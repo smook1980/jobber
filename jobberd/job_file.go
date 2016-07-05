@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"github.com/dshearer/jobber/Godeps/_workspace/src/gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
@@ -12,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/dshearer/jobber/Godeps/_workspace/src/gopkg.in/yaml.v2"
 )
 
 const (
@@ -66,33 +66,6 @@ func openUsersJobberFile(username string) (*os.File, error) {
 	}
 
 	return f, nil
-}
-
-func (m *JobManager) LoadAllJobs() (int, error) {
-	// get all users by reading passwd
-	f, err := os.Open("/etc/passwd")
-	if err != nil {
-		ErrLogger.Printf("Failed to open /etc/passwd: %v\n", err)
-		return 0, err
-	}
-	defer f.Close()
-	scanner := bufio.NewScanner(f)
-	totalJobs := 0
-	for scanner.Scan() {
-		parts := strings.Split(scanner.Text(), ":")
-		if len(parts) > 0 {
-			user := parts[0]
-			nbr, err := m.loadJobsForUser(user)
-			totalJobs += nbr
-			if err != nil {
-				ErrLogger.Printf("Failed to load jobs for %s: %v\n", err, user)
-			}
-		}
-	}
-
-	ErrLogger.Printf("totalJobs: %v; len(m.jobs): %v", totalJobs, len(m.jobs))
-
-	return len(m.jobs), nil
 }
 
 func (m *JobManager) ReloadAllJobs() (int, error) {
@@ -360,7 +333,7 @@ func parseTimeSpec(s string, fieldName string, min int, max int) (TimeSpec, erro
 
 		// make set of valid values
 		vals := make([]int, 0)
-		for _,stepStr := range stepStrs {
+		for _, stepStr := range stepStrs {
 			step, err := strconv.Atoi(stepStr)
 			if err != nil {
 				return nil, &JobberError{errMsg, err}
